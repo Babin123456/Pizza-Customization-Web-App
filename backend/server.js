@@ -1,6 +1,6 @@
+import "./config/env.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
@@ -9,8 +9,7 @@ import toppingRoutes from "./routes/toppingRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-dotenv.config();
-
+import adminRoutes from "./routes/adminRoutes.js";
 const app = express();
 const NODE_ENV = process.env.NODE_ENV || "development";
 const isDev = NODE_ENV === "development";
@@ -96,6 +95,7 @@ app.use("/api/toppings", toppingRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/admin", adminRoutes);
 /* ===============================
    ❤️ HEALTH CHECK
 ================================ */
