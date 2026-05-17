@@ -7,8 +7,10 @@ import { addItemToCart } from "../../features/cart/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { formatCurrency } from "../../utils/money";
 
+
 const renderStars = (rating = 0) =>
   Array.from({ length: 5 }, (_, index) => (index < Math.round(rating) ? "★" : "☆")).join("");
+
 
 function PizzaDetails() {
   const { id } = useParams();
@@ -27,11 +29,13 @@ function PizzaDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [usingDemoToppings, setUsingDemoToppings] = useState(false);
+
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewError, setReviewError] = useState("");
   const [reviewSuccess, setReviewSuccess] = useState("");
   const [reviewLoading, setReviewLoading] = useState(false);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,9 +82,15 @@ function PizzaDetails() {
     return (Number(pizza.basePrice) || 0) + (Number(size?.price) || 0) + (Number(crust?.price) || 0) + toppingTotal;
   }, [crust, pizza, selectedToppings, size]);
 
+
   const totalPrice = unitPrice * qty;
   const reviews = pizza?.reviews || [];
   const averageRating = Number(pizza?.rating || 0);
+
+
+
+  const totalPrice = unitPrice * qty;
+
 
   const addToCartHandler = async () => {
     if (!user) return navigate("/login");
@@ -103,6 +113,7 @@ function PizzaDetails() {
     const result = await dispatch(addItemToCart(item));
     if (addItemToCart.fulfilled.match(result)) navigate("/cart");
     else setError(result.payload || "Unable to add item to cart.");
+
   };
 
   const submitReview = async (event) => {
@@ -133,6 +144,7 @@ function PizzaDetails() {
     } finally {
       setReviewLoading(false);
     }
+
   };
 
   if (loading) {
@@ -182,12 +194,14 @@ function PizzaDetails() {
                 </span>
                 <h1 className="mt-5 text-4xl font-black md:text-5xl">{pizza.name}</h1>
                 <p className="mt-4 max-w-xl text-lg leading-8 text-slate-200">{pizza.description}</p>
+
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <span className="text-2xl text-amber-300">{renderStars(averageRating)}</span>
                   <span className="rounded-full bg-white/10 px-3 py-1 text-sm text-slate-200">
                     {averageRating ? averageRating.toFixed(1) : "No rating"} • {pizza.numReviews || reviews.length} reviews
                   </span>
                 </div>
+
               </div>
             </div>
           </section>
@@ -213,6 +227,17 @@ function PizzaDetails() {
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   {(pizza.sizes || []).map((option) => (
                     <button key={option.name} onClick={() => setSize(option)} className={`rounded-2xl border p-4 text-left transition ${size?.name === option.name ? "border-orange-300 bg-orange-400/20 shadow-lg shadow-orange-950/20" : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"}`}>
+
+                    <button
+                      key={option.name}
+                      onClick={() => setSize(option)}
+                      className={`rounded-2xl border p-4 text-left transition ${
+                        size?.name === option.name
+                          ? "border-orange-300 bg-orange-400/20 shadow-lg shadow-orange-950/20"
+                          : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"
+                      }`}
+                    >
+
                       <span className="block font-bold">{option.name}</span>
                       <span className="mt-1 block text-sm text-slate-300">+{formatCurrency(option.price)}</span>
                     </button>
@@ -224,7 +249,19 @@ function PizzaDetails() {
                 <h2 className="text-lg font-black">2. Pick your crust</h2>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   {(pizza.crusts || []).map((option) => (
+
                     <button key={option.name} onClick={() => setCrust(option)} className={`rounded-2xl border p-4 text-left transition ${crust?.name === option.name ? "border-orange-300 bg-orange-400/20 shadow-lg shadow-orange-950/20" : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"}`}>
+
+                    <button
+                      key={option.name}
+                      onClick={() => setCrust(option)}
+                      className={`rounded-2xl border p-4 text-left transition ${
+                        crust?.name === option.name
+                          ? "border-orange-300 bg-orange-400/20 shadow-lg shadow-orange-950/20"
+                          : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"
+                      }`}
+                    >
+
                       <span className="block font-bold">{option.name}</span>
                       <span className="mt-1 block text-sm text-slate-300">+{formatCurrency(option.price)}</span>
                     </button>
@@ -238,7 +275,19 @@ function PizzaDetails() {
                   {toppings.map((topping) => {
                     const active = selectedToppings.some((item) => item._id === topping._id);
                     return (
+
                       <button key={topping._id} onClick={() => toggleTopping(topping)} className={`flex items-center justify-between rounded-2xl border p-4 text-left transition ${active ? "border-emerald-300 bg-emerald-400/15" : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"}`}>
+
+                      <button
+                        key={topping._id}
+                        onClick={() => toggleTopping(topping)}
+                        className={`flex items-center justify-between rounded-2xl border p-4 text-left transition ${
+                          active
+                            ? "border-emerald-300 bg-emerald-400/15"
+                            : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"
+                        }`}
+                      >
+
                         <span className="font-semibold">{topping.name}</span>
                         <span className="text-sm text-slate-300">+{formatCurrency(topping.price)}</span>
                       </button>
@@ -261,6 +310,7 @@ function PizzaDetails() {
                   <p className="text-4xl font-black text-orange-200">{formatCurrency(totalPrice)}</p>
                 </div>
               </div>
+
 
               <button onClick={addToCartHandler} disabled={isCartLoading} className="w-full rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 px-7 py-4 text-lg font-black shadow-xl shadow-red-950/30 transition hover:from-red-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-60">
                 {isCartLoading ? "Adding..." : "Add to Cart 🛒"}
@@ -324,6 +374,18 @@ function PizzaDetails() {
             </div>
           </div>
         </section>
+
+              <button
+                onClick={addToCartHandler}
+                disabled={isCartLoading}
+                className="w-full rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 px-7 py-4 text-lg font-black shadow-xl shadow-red-950/30 transition hover:from-red-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isCartLoading ? "Adding..." : "Add to Cart 🛒"}
+              </button>
+            </div>
+          </section>
+        </div>
+
       </div>
     </main>
   );
