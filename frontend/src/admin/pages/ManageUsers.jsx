@@ -33,7 +33,7 @@ export default function ManageUsers() {
     if (!window.confirm("Delete this user permanently?")) return;
 
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL||"http://localhost:5000/api"}/user/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL||"http://localhost:5000/api"}/user/delete/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       loadUsers();
