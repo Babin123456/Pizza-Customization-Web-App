@@ -245,8 +245,9 @@ function Checkout() {
                     ) : availableCoupons.length > 0 ? (
                       <div className="space-y-3">
                         {availableCoupons.map((coupon) => {
-                          // Check eligibility for current subtotal
-                          const isEligible = subtotal >= (coupon.minOrderAmount || 0);
+                          // Check eligibility for current subtotal and per-user limit
+                          const hasReachedLimit = coupon.maxUsagePerUser > 0 && (coupon.userUsageCount || 0) >= coupon.maxUsagePerUser;
+                          const isEligible = subtotal >= (coupon.minOrderAmount || 0) && !hasReachedLimit;
                           return (
                             <div
                               key={coupon._id}
@@ -266,6 +267,11 @@ function Checkout() {
                                         Eligible
                                       </span>
                                     )}
+                                    {hasReachedLimit && (
+                                      <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-500/20 text-red-300">
+                                        Limit Reached
+                                      </span>
+                                    )}
                                   </div>
                                   <p className="text-sm text-slate-300 mt-1">
                                     {coupon.description || "Get discount on your order"}
@@ -283,6 +289,9 @@ function Checkout() {
                                     )}
                                     {coupon.usageLimit > 0 && (
                                       ` • ${coupon.usageLimit - coupon.usedCount} uses left`
+                                    )}
+                                    {coupon.maxUsagePerUser > 0 && (
+                                      ` • Limit ${coupon.maxUsagePerUser} per user (${coupon.userUsageCount || 0}/${coupon.maxUsagePerUser} used)`
                                     )}
                                   </div>
                                 </div>
