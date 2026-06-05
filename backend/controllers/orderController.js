@@ -37,34 +37,81 @@ export const createOrder = async (req, res) => {
       const coupon = await Coupon.findOne({
         code: String(couponCode).trim().toUpperCase(),
       });
+
+      // First run the shared engine: it validates active/expiry/min-order and
+      // computes the authoritative discount. (It also does an early usage-limit
+      // read, but that read is not the enforcement point -- see the atomic
+      // claim below.)
       const result = evaluateCoupon(coupon, subtotal);
       if (!result.ok) {
         return res.status(400).json({ error: result.reason });
       }
+
+      // Atomically claim one redemption slot. The global usageLimit is enforced
+      // here in a single conditional update, so two orders placed concurrently
+      // can never both take the last remaining slot. This closes the TOCTOU
+      // race that the previous read-then-save() increment allowed (same bug
+      // class as the payment-order binding race fixed in #22). usageLimit === 0
+      // means unlimited, so those coupons always pass the filter.
+      const claimed = await Coupon.findOneAndUpdate(
+        {
+          _id: coupon._id,
+          $or: [
+            { usageLimit: 0 },
+            { $expr: { $lt: ["$usedCount", "$usageLimit"] } },
+          ],
+        },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
+
+      if (!claimed) {
+        return res
+          .status(400)
+          .json({ error: "This coupon has reached its usage limit" });
+      }
+
       discount = result.discount;
-      appliedCoupon = coupon;
+      appliedCoupon = claimed;
     }
 
     const totalAmount = subtotal - discount + safeDeliveryFee;
 
-    const order = await Order.create({
-      user: req.user._id,
-      items: cart.items.map((item) => item.toObject()),
-      subtotal,
-      deliveryFee: safeDeliveryFee,
-      discount,
-      couponCode: appliedCoupon ? appliedCoupon.code : null,
-      totalAmount,
-      address: address.trim(),
-      phone: String(phone),
-      paymentMethod,
-      paymentStatus: paymentMethod === "cod" ? "cod" : "pending",
-      orderStatus: "placed",
-    });
-
-    if (appliedCoupon) {
-      appliedCoupon.usedCount += 1;
-      await appliedCoupon.save();
+    let order;
+    try {
+      order = await Order.create({
+        user: req.user._id,
+        items: cart.items.map((item) => item.toObject()),
+        subtotal,
+        deliveryFee: safeDeliveryFee,
+        discount,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+        totalAmount,
+        address: address.trim(),
+        phone: String(phone),
+        paymentMethod,
+        paymentStatus: paymentMethod === "cod" ? "cod" : "pending",
+        orderStatus: "placed",
+      });
+    } catch (orderErr) {
+      // The order failed to persist after we claimed a redemption slot, so
+      // release that slot to keep usedCount honest -- a failed order must not
+      // burn a coupon use. Best-effort: never let a rollback failure mask the
+      // original error.
+      if (appliedCoupon) {
+        try {
+          await Coupon.updateOne(
+            { _id: appliedCoupon._id, usedCount: { $gt: 0 } },
+            { $inc: { usedCount: -1 } }
+          );
+        } catch (rollbackErr) {
+          console.error(
+            "Failed to release coupon slot after order creation error:",
+            rollbackErr
+          );
+        }
+      }
+      throw orderErr;
     }
 
     if (paymentMethod === "cod") {
