@@ -18,6 +18,7 @@ export default function ManageCoupons() {
   const [usageLimit, setUsageLimit] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [maxUsagePerUser, setMaxUsagePerUser] = useState("1");
 
   const { user } = useSelector((s) => s.auth);
   const token = user?.token;
@@ -48,6 +49,7 @@ export default function ManageCoupons() {
     setUsageLimit("");
     setExpiresAt("");
     setIsPublic(true);
+    setMaxUsagePerUser("1");
   };
 
   const createCoupon = async () => {
@@ -70,6 +72,7 @@ export default function ManageCoupons() {
           usageLimit: Number(usageLimit) || 0,
           expiresAt: expiresAt || null,
           isPublic,
+          maxUsagePerUser: Number(maxUsagePerUser) || 0,
         },
         authHeader
       );
@@ -190,6 +193,14 @@ export default function ManageCoupons() {
           className="w-full p-2 mb-2 rounded text-black"
         />
 
+        <input
+          type="number"
+          placeholder="Max usage per user (0 = unlimited)"
+          value={maxUsagePerUser}
+          onChange={(e) => setMaxUsagePerUser(e.target.value)}
+          className="w-full p-2 mb-2 rounded text-black"
+        />
+
         <label className="block text-sm text-gray-400 mb-1">Expiry date (optional)</label>
         <input
           type="date"
@@ -245,6 +256,9 @@ export default function ManageCoupons() {
                 {c.usageLimit > 0
                   ? `Used ${c.usedCount}/${c.usageLimit}. `
                   : `Used ${c.usedCount}. `}
+                {c.maxUsagePerUser > 0
+                  ? `Limit per user: ${c.maxUsagePerUser}. `
+                  : `Limit per user: Unlimited. `}
                 {c.expiresAt &&
                   `Expires ${new Date(c.expiresAt).toLocaleDateString()}.`}
               </p>
