@@ -59,6 +59,7 @@ export const getAdminStats = async (req, res) => {
       cancelledOrders,
       recentOrders,
       topPizzas,
+      topToppings,
       revenueSeries,
       orderStatusBreakdown,
       paymentBreakdown,
@@ -83,12 +84,25 @@ export const getAdminStats = async (req, res) => {
         { $unwind: "$items" },
         {
           $group: {
-            
+            _id: "$items.name",
             quantity: { $sum: "$items.qty" },
             revenue: { $sum: { $multiply: ["$items.price", "$items.qty"] } },
           },
         },
         { $sort: { revenue: -1 } },
+        { $limit: 5 },
+      ]),
+      Order.aggregate([
+        { $match: paidMatch },
+        { $unwind: "$items" },
+        { $unwind: "$items.toppings" },
+        {
+          $group: {
+            _id: "$items.toppings",
+            count: { $sum: "$items.qty" },
+          },
+        },
+        { $sort: { count: -1 } },
         { $limit: 5 },
       ]),
       Order.aggregate([
@@ -146,6 +160,7 @@ export const getAdminStats = async (req, res) => {
         },
         recentOrders,
         topPizzas,
+        topToppings,
         revenueSeries,
         razorpay: getRazorpayMode(),
       },
