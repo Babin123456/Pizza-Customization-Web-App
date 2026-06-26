@@ -2,6 +2,9 @@ import "./config/env.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
 import connectDB from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
 import pizzaRoutes from "./routes/pizzaRoutes.js";
@@ -21,7 +24,7 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const isDev = NODE_ENV === "development";
 
 /* ===============================
-   ðŸ”Œ DATABASE CONNECTION (SAFE)
+   🔌 DATABASE CONNECTION (SAFE)
 ================================ */
 ///////////////////////////safe side
 let isConnected = false;
@@ -33,7 +36,7 @@ app.use(async (req, res, next) => {
       isConnected = true;
       next();
     } catch (err) {
-      console.error("âŒ Database connection error:", err);
+      console.error("❌ Database connection error:", err);
       return res.status(500).json({ error: "Database connection error" });
     }
   } else {
@@ -42,7 +45,7 @@ app.use(async (req, res, next) => {
 });
 
 /* ===============================
-   ðŸŒ CORS CONFIG (PRODUCTION SAFE)
+   🌐 CORS CONFIG (PRODUCTION SAFE)
 ================================ */
 const allowedOrigins = isDev
   ? [
@@ -63,7 +66,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      // â— DO NOT throw error (preflight break hota hai)
+      // ❗ DO NOT throw error (preflight break hota hai)
       callback(null, false);
     }
   },
@@ -73,17 +76,20 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("/*", cors(corsOptions)); // âœ… Preflight handler
+app.options("/*", cors(corsOptions)); // ✅ Preflight handler
 
 /* ===============================
-   ðŸ›¡ï¸ SECURITY MIDDLEWARE
+   🛡️ SECURITY MIDDLEWARE
 ================================ */
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(hpp());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 /* ===============================
-   ðŸ§¾ DEV LOGGER
+   👾 DEV LOGGER
 ================================ */
 if (isDev) {
   app.use((req, res, next) => {
