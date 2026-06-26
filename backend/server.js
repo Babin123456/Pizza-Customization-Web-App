@@ -13,6 +13,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import dotenv from "dotenv";
 import couponRoutes from "./routes/couponRoutes.js";
 import loyaltyRoutes from "./routes/loyaltyRoutes.js";
+import globalErrorHandler from "./middlewares/errorMiddleware.js";
 dotenv.config();
 
 
@@ -126,27 +127,16 @@ app.get("/", (req, res) => {
 });
 
 /* ===============================
-   âŒ 404 HANDLER
+   â Œ 404 HANDLER
 ================================ */
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
 /* ===============================
-   âš ï¸ GLOBAL ERROR HANDLER
+   ⚠️ GLOBAL ERROR HANDLER
 ================================ */
-app.use((err, req, res, next) => {
-  const status = err.status || (res.statusCode >= 400 ? res.statusCode : 500);
-
-  if (isDev) {
-    console.error("âŒ ERROR:", err.message);
-    console.error(err.stack);
-  }
-
-  res.status(status).json({
-    error: isDev ? err.message : "Internal Server Error",
-  });
-});
+app.use(globalErrorHandler);
 
 /* ===============================
    ðŸš€ SERVER START
