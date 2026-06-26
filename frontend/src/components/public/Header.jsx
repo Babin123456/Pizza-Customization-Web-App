@@ -22,19 +22,19 @@ function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080411]/85 text-white shadow-2xl shadow-black/20 backdrop-blur-xl">
       <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-3 text-xl font-black tracking-tight">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-red-500 to-orange-400 shadow-lg shadow-red-950/30">🍕</span>
+        <Link to="/" aria-label="PizzaCraft Homepage" className="flex items-center gap-3 text-xl font-black tracking-tight">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-red-500 to-orange-400 shadow-lg shadow-red-950/30" role="img" aria-label="pizza slice logo">🍕</span>
           <span>PizzaCraft</span>
         </Link>
 
-        <nav className="hidden items-center gap-2 md:flex">
+        <nav aria-label="Primary Navigation" className="hidden items-center gap-2 md:flex">
           <NavLink to="/" className={linkClass}>Menu</NavLink>
           {user && <NavLink to={user.role === "admin" ? "/admin/dashboard" : "/dashboard"} className={linkClass}>Dashboard</NavLink>}
           {user && user.role !== "admin" && <NavLink to="/orders" className={linkClass}>Orders</NavLink>}
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link to="/cart" className="relative rounded-full border border-white/10 bg-white/10 px-4 py-2 font-bold transition hover:bg-white/15">
+          <Link to="/cart" aria-label={`Shopping Cart, contains ${cartCount} items`} className="relative rounded-full border border-white/10 bg-white/10 px-4 py-2 font-bold transition hover:bg-white/15">
             🛒 Cart
             {cartCount > 0 && <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-orange-400 px-1 text-xs font-black text-orange-950">{cartCount}</span>}
           </Link>

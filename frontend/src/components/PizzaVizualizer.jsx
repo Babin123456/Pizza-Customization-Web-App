@@ -35,7 +35,14 @@ const PizzaVisualizer = memo(({ toppings = [], size = "medium", crust = "thin", 
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <svg width="320" height="320" viewBox="0 0 320 320" className="drop-shadow-xl">
+      <svg 
+        width="320" 
+        height="320" 
+        viewBox="0 0 320 320" 
+        className="drop-shadow-xl"
+        role="img"
+        aria-label={`Customized pizza preview: ${size} size, ${crust} crust, ${sauce} sauce base, with toppings: ${toppings.map(t => t?.name || t).join(", ") || "no toppings yet"}`}
+      >
         {/* Crust ring */}
         <circle cx={cx} cy={cy} r={r + 14 * scale} fill={crustColor} />
         {/* Sauce base */}
