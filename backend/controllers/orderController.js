@@ -10,6 +10,7 @@ import {
   awardLoyaltyForDeliveredOrder,
   reverseLoyaltyForOrder,
 } from "./loyaltyController.js";
+import { sendOrderReceiptEmail } from "../utils/emailService.js";
 
 /**
  * Release the coupon usage slot an order claimed, mirroring the rollback in
@@ -278,6 +279,11 @@ export const createOrder = async (req, res) => {
         console.error("Failed to award loyalty points for COD order:", loyaltyErr);
       }
     }
+
+    // Send email receipt in the background so it doesn't block the API response
+    sendOrderReceiptEmail(req.user.email, req.user.name, order).catch(err => {
+      console.error("Failed to send order confirmation email:", err);
+    });
 
     res.status(201).json({
       success: true,
