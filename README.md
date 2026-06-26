@@ -196,6 +196,13 @@ success@razorpay
 
 ---
 
+## 📖 Documentation
+
+- [System Architecture Guide](docs/ARCHITECTURE.md)
+- [REST API Endpoint Reference](docs/API_DOCUMENTATION.md)
+
+---
+
 ## 📊 Future Enhancements
 
 * Push notifications
